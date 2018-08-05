@@ -53,7 +53,7 @@ class Diffity {
 
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    debug( 'browser launched ', this.url);
+    debug( 'browser launched ');
 
     page.setViewport(this.viewPort);
     debug( 'view port set to ', this.viewPort);
