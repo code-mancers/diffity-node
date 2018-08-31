@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 
+const request = require('request');
 const puppeteer = require('puppeteer');
 const debug = require('debug')('diffity:screenshoter');
 
@@ -49,6 +50,7 @@ class Diffity {
   }
 
   async screenshot(identifier) {
+    this.identifier = identifier;
     this._validateProps();
 
     const browser = await puppeteer.launch();
@@ -62,7 +64,7 @@ class Diffity {
 
     debug( 'naviagted to ', this.url);
 
-    const outputPath = path.join(__dirname, 'tmp', identifier +'.png');
+    const outputPath = path.join(__dirname, 'tmp', this.identifier +'.png');
 
     await page.screenshot({path: outputPath, fullPage: true});
 
@@ -70,6 +72,39 @@ class Diffity {
 
     browser.close();
     return this;
+  }
+
+  createRun(project, name = "") {
+    if (!name) {
+      name = new Date();
+    }
+    request
+      .post({url: this.url + '/api/v1/runs', form: {project: project, name: name}}, function optionalCallback(err, httpResponse, body) {
+        if (err) {
+          return console.error('create run failed:', err);
+        }
+        debug('Run created.', body);
+      });
+  }
+
+  upload(screenshotPath) {
+    const formData = {
+      identifier: this.identifier, 
+      image: fs.createReadStream(screenshotPath), 
+      browser: this.browser, 
+      device: this.device, 
+      os: this.os,
+      // browser_version: , 
+      device_name: this.deviceName, 
+      // os_version: 
+    };
+    request
+      .post({url: this.url + '/api/v1/run', formData: formData}, function optionalCallback(err, httpResponse, body) {
+        if (err) {
+          return console.error('upload failed:', err);
+        }
+        debug('Upload successful!  Server responded with:', body);
+      });
   }
 }
 
