@@ -74,17 +74,22 @@ class Diffity {
     return this;
   }
 
-  createRun(project, name = "") {
-    if (!name) {
-      name = new Date();
+  createRun(details = {}) {
+    if (!details.project) {
+      details.project = this.projectName;
     }
+    if (!details.name) {
+      details.name = `${details.project}-${new Date()}`;
+    }
+    const query = `project=${details.project}&name=${details.name}&js_driver=${details.js_driver || 'diffity-node'}&group=${details.group || 'group'}&author=${details.author || 'author'}`;
     request
-      .post({url: this.url + '/api/v1/runs', form: {project: project, name: name}}, function optionalCallback(err, httpResponse, body) {
+      .post({url: this.apiBaseUrl + `/api/v1/runs?${query}`}, function optionalCallback(err, httpResponse, body) {
         if (err) {
           return console.error('create run failed:', err);
         }
         debug('Run created.', body);
-      });
+      })
+      .auth(this.apiKey, 'X', false);
   }
 
   upload(screenshotPath) {
@@ -99,7 +104,8 @@ class Diffity {
       // os_version: 
     };
     request
-      .post({url: this.url + '/api/v1/run', formData: formData}, function optionalCallback(err, httpResponse, body) {
+      .auth(this.apiKey, 'X', false)
+      .post({url: this.apiBaseUrl + '/api/v1/run', formData: formData}, function optionalCallback(err, httpResponse, body) {
         if (err) {
           return console.error('upload failed:', err);
         }
