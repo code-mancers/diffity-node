@@ -6,7 +6,7 @@ diffity
 ### Install
 
 ```
-npm install -g diffity-node
+npm install diffity-node
 ```
 
 ### Sample Usage
