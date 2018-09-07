@@ -15,6 +15,10 @@
   ],
   "author": "Revath S Kumar <rsk@revathskumar.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/code-mancers/diffity-node.git"
+  },
   "dependencies": {
     "axios": "^0.18.0",
     "debug": "^3.1.0",

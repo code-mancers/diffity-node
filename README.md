@@ -13,6 +13,7 @@ npm install -g diffity-node
 
 ```js
 // example.js
+const Diffity = require('diffity-node');
 
 (async () =>{
   const diffity = new Diffity({
