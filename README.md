@@ -15,10 +15,22 @@ npm install -g diffity-node
 // example.js
 
 (async () =>{
-  const d1 = new Diffity({ apiKey: "api-key", apiBaseUrl: 'http://localhost:4000', projectName: 'Diffity Node' });
-  d1.loadUrl('https://blog.revathskumar.com')
+  const diffity = new Diffity({
+    apiKey: "api-key", apiBaseUrl: 'http://localhost:4000', projectName: 'Diffity Node'
+  });
+  await diffity.loadUrl('https://www.codemancers.com/why_us/index.html');
+  await diffity.screenshot('homepage');
 
-  await d1.screenshot('homepage');
+  await diffity.loadUrl('https://www.codemancers.com/portfolio/index.html');
+  await diffity.screenshot('portfolio');
+
+  await diffity.loadUrl('https://www.codemancers.com/contact/index.html');
+  await diffity.screenshot('contact');
+
+  await diffity.loadUrl('https://crypt.codemancers.com/');
+  await diffity.screenshot('blog');
+
+  diffity.end();
 })()
 ```
 
