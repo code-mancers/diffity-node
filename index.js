@@ -35,10 +35,6 @@ class Diffity {
     this.currentRunId = null;
 
     this.uploadQueue = [];
-    // this.browser = await puppeteer.launch();
-    // this.page =  await this.browser.newPage();
-
-    // debug( 'browser launched ');
   }
 
   async start() {
@@ -46,11 +42,18 @@ class Diffity {
     this.page =  await this.headlessBrowser.newPage();
 
     debug( 'browser launched ');
+
+    this.page.setViewport(this.viewPort);
+    debug( 'view port set to ', this.viewPort);
+
+
     return this;
   }
 
   end() {
     this.headlessBrowser.close();
+
+
   }
 
   _validateProps() {
@@ -71,7 +74,6 @@ class Diffity {
   }
 
   async screenshot(identifier) {
-    this.identifier = identifier;
     this._validateProps();
 
     if (!this.page) {
@@ -82,21 +84,18 @@ class Diffity {
     // const page = await browser.newPage();
     // debug( 'browser launched ');
 
-    this.page.setViewport(this.viewPort);
-    debug( 'view port set to ', this.viewPort);
-
     await this.page.goto(this.url);
 
     debug( 'naviagted to ', this.url);
 
-    const outputPath = path.join(__dirname, 'tmp', this.identifier +'.png');
+    const outputPath = path.join(__dirname, 'tmp', identifier +'.png');
 
     await this.page.screenshot({path: outputPath, fullPage: true});
 
     debug( 'screenshot saved ', outputPath);
-    // this.uploadQueue.push(outputPath);
+    // this.uploadQueue.push({ outputPath, identifier });
 
-    this.upload(outputPath);
+    this.upload(outputPath, identifier);
 
     // browser.close();
     return this;
@@ -104,7 +103,7 @@ class Diffity {
 
   uploadAll() {
     this.uploadQueue.forEach(uploadImage => {
-      this.upload(uploadImage);
+      this.upload(uploadImage.outputPath, uploadImage.identifier);
     });
   }
 
@@ -124,7 +123,7 @@ class Diffity {
     return axios
         .post(this.apiBaseUrl + `/api/v1/runs`, runDetails, {
           auth: {
-            username: this.apiKey, 
+            username: this.apiKey,
             password: 'X'
           }
         })
@@ -153,7 +152,7 @@ class Diffity {
       // });
   }
 
-  async upload(screenshotPath) {
+  async upload(screenshotPath, identifier) {
     // const formData = {
     //   identifier: this.identifier,
       // image: {
@@ -179,18 +178,16 @@ class Diffity {
 
     if (!this.currentRunId) {
       const { id } = await this.createRun();
-      this.currentRunId = id; 
+      this.currentRunId = id;
     }
 
     const formData = new FormData();
-    formData.append("identifier", this.identifier);
+    formData.append("identifier", identifier);
     formData.append("browser", this.browser);
     formData.append("device", this.device);
     formData.append("os", this.os);
     formData.append("device_name", this.deviceName);
     formData.append("image", fs.createReadStream(screenshotPath));
-
-    const queryParams = `identifier=${this.identifier}&browser=${this.browser}&device=${this.device}&os=${this.os}&device_name=${this,this.deviceName}`;
 
     debug( 'uploading screenshot ', screenshotPath);
     // return new Promise((resolve, reject) =>{
@@ -199,7 +196,7 @@ class Diffity {
         .post(this.apiBaseUrl + `/api/v1/runs/${this.currentRunId}/run_images`, formData, {
           headers: formData.getHeaders(),
           auth: {
-            username: this.apiKey, 
+            username: this.apiKey,
             password: 'X'
           }
         })
