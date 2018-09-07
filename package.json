@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "description": "Node.js integration for diffity service",
   "main": "index.js",
-  "engines" : { 
-    "node" : ">=8", 
-    "npm" : ">=5.6" 
+  "engines": {
+    "node": ">=8",
+    "npm": ">=5.6"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,9 +16,10 @@
   "author": "Revath S Kumar <rsk@revathskumar.com>",
   "license": "MIT",
   "dependencies": {
-    "puppeteer": "^1.6.2"
+    "axios": "^0.18.0",
+    "debug": "^3.1.0",
+    "form-data": "^2.3.2",
+    "puppeteer": "^1.7.0"
   },
-  "devDependencies": {
-    "debug": "^3.1.0"
-  }
+  "devDependencies": {}
 }
