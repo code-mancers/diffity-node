@@ -52,8 +52,24 @@ class Diffity {
 
   end() {
     this.headlessBrowser.close();
+    this._updateStatus();
+  }
 
-
+  _updateStatus(status = "completed") {
+    return axios.put(this.apiBaseUrl + `/api/v1/runs/${this.currentRunId}/status`, { status }, {
+      auth: {
+        username: this.apiKey,
+        password: 'X'
+      }
+    })
+    .then((response) => {
+      if(response.data.id) {
+        debug('Run status updated successfully :: ', response.data.screenshot_progress);
+        return response.data;
+      }
+      debug('Run status updated failed :: ', response.data);
+      return response.data;
+    })
   }
 
   _validateProps() {
@@ -63,30 +79,25 @@ class Diffity {
     if (!this.projectName) {
       throw new Error('Missing mandatory property :: projectName');
     }
-    if (!this.url) {
-      throw new Error('Missing URL :: use loadUrl to set');
-    }
+    // if (!this.url) {
+    //   throw new Error('Missing URL :: use loadUrl to set');
+    // }
   }
 
-  loadUrl(url) {
-    this.url = url;
-    return this;
+  async loadUrl(url) {
+    if (!this.page) {
+      await this.start();
+    }
+    debug( 'navigating to ', url);
+    return this.page.goto(url);
   }
 
   async screenshot(identifier) {
     this._validateProps();
 
-    if (!this.page) {
-      await this.start();
-    }
-
     // const browser = await puppeteer.launch();
     // const page = await browser.newPage();
     // debug( 'browser launched ');
-
-    await this.page.goto(this.url);
-
-    debug( 'naviagted to ', this.url);
 
     const outputPath = path.join(__dirname, 'tmp', identifier +'.png');
 
@@ -95,10 +106,7 @@ class Diffity {
     debug( 'screenshot saved ', outputPath);
     // this.uploadQueue.push({ outputPath, identifier });
 
-    this.upload(outputPath, identifier);
-
-    // browser.close();
-    return this;
+    return this.upload(outputPath, identifier);
   }
 
   uploadAll() {
@@ -121,18 +129,18 @@ class Diffity {
     // const query = `project=${details.project}&name=${details.name}&js_driver=${details.js_driver || 'diffity-node'}&group=${details.group || 'group'}&author=${details.author || 'author'}`;
     // return new Promise((resolve, reject) => {
     return axios
-        .post(this.apiBaseUrl + `/api/v1/runs`, runDetails, {
-          auth: {
-            username: this.apiKey,
-            password: 'X'
-          }
-        })
-        .then((response) => {
-          if(response.data.id) {
-            debug('Run created :: ', response.data.id);
-            return response.data;
-          }
-        })
+      .post(this.apiBaseUrl + `/api/v1/runs`, runDetails, {
+        auth: {
+          username: this.apiKey,
+          password: 'X'
+        }
+      })
+      .then((response) => {
+        if(response.data.id) {
+          debug('Run created :: ', response.data.id);
+          return response.data;
+        }
+      })
         // .catch(errors => {
 
         // })
@@ -192,7 +200,7 @@ class Diffity {
     debug( 'uploading screenshot ', screenshotPath);
     // return new Promise((resolve, reject) =>{
       // request
-      axios
+    return axios
         .post(this.apiBaseUrl + `/api/v1/runs/${this.currentRunId}/run_images`, formData, {
           headers: formData.getHeaders(),
           auth: {
