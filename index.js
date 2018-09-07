@@ -183,11 +183,11 @@ class Diffity {
     }
 
     const formData = new FormData();
-    // formData.append("identifier", this.identifier);
-    // formData.append("browser", this.browser);
-    // formData.append("device", this.device);
-    // formData.append("os", this.os);
-    // formData.append("device_name", this.deviceName);
+    formData.append("identifier", this.identifier);
+    formData.append("browser", this.browser);
+    formData.append("device", this.device);
+    formData.append("os", this.os);
+    formData.append("device_name", this.deviceName);
     formData.append("image", fs.createReadStream(screenshotPath));
 
     const queryParams = `identifier=${this.identifier}&browser=${this.browser}&device=${this.device}&os=${this.os}&device_name=${this,this.deviceName}`;
@@ -196,20 +196,21 @@ class Diffity {
     // return new Promise((resolve, reject) =>{
       // request
       axios
-        .post(this.apiBaseUrl + `/api/v1/runs/${this.currentRunId}/run_images?${queryParams}`, formData, {
-          headers:{'Content-Type': 'mulipart/form-data; charset=utf-8', 'Accept': 'application/json'},
+        .post(this.apiBaseUrl + `/api/v1/runs/${this.currentRunId}/run_images`, formData, {
+          headers: formData.getHeaders(),
           auth: {
             username: this.apiKey, 
             password: 'X'
           }
         })
         .then(response => {
-          if(response.data.id) {
-            debug('Upload successful!  Server responded with:', response.data);
-            return response.data;
+          const repsonseData = response.data.data;
+          if(repsonseData.run_id) {
+            debug('Upload successful!  Server responded with:', repsonseData.run_id);
+            return repsonseData;
           }
-          debug('Upload failed!  Server responded with:', response.data);
-          return response.data;
+          debug('Upload failed!  Server responded with:', repsonseData);
+          return repsonseData;
         })
 
         //   if (err) {
